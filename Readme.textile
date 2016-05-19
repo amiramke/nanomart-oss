@@ -1,8 +1,8 @@
 This code is terrible. 
 
-Clean it up.
+Clean it up. Enjoy!
 
 Install dependencies with @bundle@
 
-Run the tests with @bundle exec rspec nanomart_spec.rb@
+Run the tests with @bundle exec rake@
 
