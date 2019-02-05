@@ -23,8 +23,8 @@ PLATFORMS
 
 DEPENDENCIES
   highline
-  rake (~> 10.0)
+  rake
   rspec
 
 BUNDLED WITH
-   1.11.2
+   1.16.5

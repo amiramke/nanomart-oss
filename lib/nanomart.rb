@@ -1,7 +1,6 @@
 # you can buy just a few things at this nanomart
 require 'highline'
 
-
 class Nanomart
   class NoSale < StandardError; end
 

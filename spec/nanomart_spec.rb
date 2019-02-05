@@ -1,7 +1,4 @@
-require 'rspec'
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'nanomart'
-
 
 class Age9
   def get_age() 9 end
