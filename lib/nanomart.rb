@@ -25,7 +25,7 @@ class Nanomart
           end
 
     itm.rstrctns.each do |r|
-      itm.try_purchase(r.ck)
+      itm.try_purchase(r.check?)
     end
     itm.log_sale
   end
@@ -38,46 +38,30 @@ class HighlinePrompter
 end
 
 
-module Restriction
+class Restriction
   DRINKING_AGE = 21
   SMOKING_AGE = 18
 
-  class DrinkingAge
+  class Base
     def initialize(p)
       @prompter = p
-    end
-
-    def ck
-      age = @prompter.get_age
-      if age >= DRINKING_AGE
-        true
-      else
-        false
-      end
     end
   end
 
-  class SmokingAge
-    def initialize(p)
-      @prompter = p
-    end
-
-    def ck
-      age = @prompter.get_age
-      if age >= SMOKING_AGE
-        true
-      else
-        false
-      end
+  class DrinkingAge < Restriction::Base
+    def check?
+      @prompter.get_age >= DRINKING_AGE
     end
   end
 
-  class SundayBlueLaw
-    def initialize(p)
-      @prompter = p
+  class SmokingAge < Restriction::Base
+    def check?
+      @prompter.get_age >= SMOKING_AGE
     end
+  end
 
-    def ck
+  class SundayBlueLaw < Restriction::Base
+    def check?
       # pp Time.now.wday
       # debugger
       Time.now.wday != 0      # 0 is Sunday
@@ -94,11 +78,11 @@ class Item
 
   def log_sale
     File.open(@logfile, 'a') do |f|
-      f.write(nam.to_s + "\n")
+      f.write(name.to_s + "\n")
     end
   end
 
-  def nam
+  def name
     class_string = self.class.to_s
     short_class_string = class_string.sub(/^Item::/, '')
     lower_class_string = short_class_string.downcase
