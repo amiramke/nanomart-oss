@@ -1,5 +1,5 @@
 # you can buy just a few things at this nanomart
-
+require 'pry'
 class Nanomart
   class NoSale < StandardError; end
 
@@ -23,57 +23,42 @@ class Nanomart
             raise ArgumentError, "Don't know how to sell #{itm_type}"
           end
 
-    itm.rstrctns.each do |r|
+    itm.restrictions.each do |r|
       itm.try_purchase(r.ck)
     end
     itm.log_sale
   end
 end
 
-module Restriction
-  DRINKING_AGE = 21
-  SMOKING_AGE = 18
-
-  class DrinkingAge
-    def initialize(p)
-      @prompter = p
-    end
-
-    def ck
-      age = @prompter.get_age
-      if age >= DRINKING_AGE
-        true
-      else
-        false
-      end
-    end
+class Restriction
+  def initialize(p)
+    @prompter = p
   end
 
-  class SmokingAge
-    def initialize(p)
-      @prompter = p
-    end
-
-    def ck
-      age = @prompter.get_age
-      if age >= SMOKING_AGE
-        true
-      else
-        false
-      end
+  def ck
+    age = @prompter.get_age
+    if age >= self.class::AGE
+      true
+    else
+      false
     end
   end
+end
 
-  class SundayBlueLaw
-    def initialize(p)
-      @prompter = p
-    end
 
-    def ck
-      # pp Time.now.wday
-      # debugger
-      Time.now.wday != 0      # 0 is Sunday
-    end
+class DrinkingAge < Restriction
+  AGE = 21
+end
+
+class SmokingAge < Restriction
+  AGE = 18
+end
+
+class SundayBlueLaw < Restriction
+  def ck
+    # pp Time.now.wday
+    # debugger
+    Time.now.wday != 0      # 0 is Sunday
   end
 end
 
@@ -107,27 +92,27 @@ class Item
   end
 
   class Beer < Item
-    def rstrctns
-      [Restriction::DrinkingAge.new(@prompter)]
+    def restrictions
+      [DrinkingAge.new(@prompter)]
     end
   end
 
   class Whiskey < Item
     # you can't sell hard liquor on Sundays for some reason
-    def rstrctns
-      [Restriction::DrinkingAge.new(@prompter), Restriction::SundayBlueLaw.new(@prompter)]
+    def restrictions
+      [DrinkingAge.new(@prompter), SundayBlueLaw.new(@prompter)]
     end
   end
 
   class Cigarettes < Item
     # you have to be of a certain age to buy tobacco
-    def rstrctns
-      [Restriction::SmokingAge.new(@prompter)]
+    def restrictions
+      [SmokingAge.new(@prompter)]
     end
   end
 
   class Cola < Item
-    def rstrctns
+    def restrictions
       []
     end
   end
@@ -138,7 +123,7 @@ class Item
       :canned_haggis
     end
 
-    def rstrctns
+    def restrictions
       []
     end
   end
