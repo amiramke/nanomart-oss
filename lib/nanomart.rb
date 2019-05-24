@@ -1,5 +1,4 @@
 # you can buy just a few things at this nanomart
-require 'highline'
 
 class Nanomart
   class NoSale < StandardError; end
@@ -30,13 +29,6 @@ class Nanomart
     itm.log_sale
   end
 end
-
-class HighlinePrompter
-  def get_age
-    HighLine.new.ask('Age? ', Integer) # prompts for user's age, reads it in
-  end
-end
-
 
 module Restriction
   DRINKING_AGE = 21
