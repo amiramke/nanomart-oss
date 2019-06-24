@@ -25,18 +25,16 @@ class Nanomart
           end
 
     itm.rstrctns.each do |r|
-      itm.try_purchase(r.ck)
+      #if r.ck
+      #  return true
+      if !r.ck
+        raise Nanomart::NoSale
+      end
+      #itm.try_purchase(r.ck)
     end
     itm.log_sale
   end
 end
-
-class HighlinePrompter
-  def get_age
-    HighLine.new.ask('Age? ', Integer) # prompts for user's age, reads it in
-  end
-end
-
 
 module Restriction
   DRINKING_AGE = 21
@@ -73,9 +71,9 @@ module Restriction
   end
 
   class SundayBlueLaw
-    def initialize(p)
-      @prompter = p
-    end
+    #def initialize(p)
+    #  @prompter = p
+    #end
 
     def ck
       # pp Time.now.wday
@@ -106,13 +104,16 @@ class Item
     class_sym
   end
 
-  def try_purchase(success)
-    if success
-      return true
-    else
-      raise Nanomart::NoSale
-    end
+  def rstrctns # make sure it must be overriden
+    []
   end
+  #def try_purchase(success)
+  #  if success
+  #    return true
+  #  else
+  #    raise Nanomart::NoSale
+  #  end
+  #end
 
   class Beer < Item
     def rstrctns
@@ -123,7 +124,7 @@ class Item
   class Whiskey < Item
     # you can't sell hard liquor on Sundays for some reason
     def rstrctns
-      [Restriction::DrinkingAge.new(@prompter), Restriction::SundayBlueLaw.new(@prompter)]
+      [Restriction::DrinkingAge.new(@prompter), Restriction::SundayBlueLaw.new()]
     end
   end
 
