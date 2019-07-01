@@ -24,8 +24,10 @@ class Nanomart
             raise ArgumentError, "Don't know how to sell #{itm_type}"
           end
 
+    raise ArgumentError, "#{itm_type} is not in stock" unless itm.is_in_inventory?("#{itm_type}")
+
     itm.rstrctns.each do |r|
-      itm.try_purchase(r.ck)
+      itm.try_purchase(r.is_allowed_purchase)
     end
     itm.log_sale
   end
@@ -38,46 +40,28 @@ class HighlinePrompter
 end
 
 
-module Restriction
+class Restriction
   DRINKING_AGE = 21
   SMOKING_AGE = 18
 
-  class DrinkingAge
-    def initialize(p)
-      @prompter = p
-    end
+  def initialize(p)
+    @prompter = p
+  end
 
-    def ck
-      age = @prompter.get_age
-      if age >= DRINKING_AGE
-        true
-      else
-        false
-      end
+  class DrinkingAge < Restriction
+    def is_allowed_purchase
+      @prompter.get_age >= DRINKING_AGE
     end
   end
 
-  class SmokingAge
-    def initialize(p)
-      @prompter = p
-    end
-
-    def ck
-      age = @prompter.get_age
-      if age >= SMOKING_AGE
-        true
-      else
-        false
-      end
+  class SmokingAge < Restriction
+    def is_allowed_purchase
+      @prompter.get_age >= SMOKING_AGE
     end
   end
 
-  class SundayBlueLaw
-    def initialize(p)
-      @prompter = p
-    end
-
-    def ck
+  class SundayBlueLaw < Restriction
+    def is_allowed_purchase
       # pp Time.now.wday
       # debugger
       Time.now.wday != 0      # 0 is Sunday
@@ -90,6 +74,16 @@ class Item
 
   def initialize(logfile, prompter)
     @logfile, @prompter = logfile, prompter
+  end
+
+  def rstrctns
+    []
+  end
+
+  def is_in_inventory(item_name)
+    File.open('inventory.log', 'a') do |f|
+
+    end
   end
 
   def log_sale
@@ -107,11 +101,9 @@ class Item
   end
 
   def try_purchase(success)
-    if success
-      return true
-    else
-      raise Nanomart::NoSale
-    end
+    raise Nanomart::NoSale unless success
+
+    true
   end
 
   class Beer < Item
@@ -120,7 +112,7 @@ class Item
     end
   end
 
-  class Whiskey < Item
+  class HardLiquor < Item
     # you can't sell hard liquor on Sundays for some reason
     def rstrctns
       [Restriction::DrinkingAge.new(@prompter), Restriction::SundayBlueLaw.new(@prompter)]
@@ -134,20 +126,13 @@ class Item
     end
   end
 
-  class Cola < Item
-    def rstrctns
-      []
-    end
+  class Pop < Item
   end
 
   class CannedHaggis < Item
     # the common-case implementation of Item.nam doesn't work here
     def nam
       :canned_haggis
-    end
-
-    def rstrctns
-      []
     end
   end
 end
