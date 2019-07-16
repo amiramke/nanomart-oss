@@ -144,3 +144,47 @@ class Item
   end
 end
 
+# For DB
+# - Tables
+#   - Item
+#     - id (pk)
+#     - name
+#     - other metadata
+
+#   - Restrictions
+#     - id (pk)
+#     - type
+#     - rule: text|blob (value example: {rule: {filed: age, comp: ">|<|=", value: 18}})
+#     - age
+#     - day
+
+
+#   - Item_Restriction
+#     - id (pk)
+#     - item_id (idx)
+#     - restriction_id
+
+
+# -----------------------------
+
+# Build APIs (RESTful)
+# - Item
+#   - add
+#   - get
+#   - udpate
+#   - remove(??)
+
+
+# --------------------------------
+#  Build Web App  / Native Apps
+
+
+#  ------------
+#  Testing everything / unit test
+#  integration test
+#  logging/monitoring
+#  alerting
+#  invest into devops
+#  db replication/scaling/relaiability
+
+
