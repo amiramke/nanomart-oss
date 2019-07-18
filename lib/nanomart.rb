@@ -1,6 +1,6 @@
 # you can buy just a few things at this nanomart
 
-class Nanomart
+class Nanomart < ActiveRecord
   class NoSale < StandardError; end
 
   def initialize(logfile, prompter)
@@ -8,38 +8,39 @@ class Nanomart
   end
 
   def sell_me(itm_type)
-    itm = case itm_type
+    itm_klass = case itm_type
           when :beer
-            Item::Beer.new(@logfile, @prompter)
+            Item::Beer
           when :whiskey
-            Item::Whiskey.new(@logfile, @prompter)
+            Item::Whiskey
           when :cigarettes
-            Item::Cigarettes.new(@logfile, @prompter)
+            Item::Cigarettes
           when :cola
-            Item::Cola.new(@logfile, @prompter)
+            Item::Cola
           when :canned_haggis
-            Item::CannedHaggis.new(@logfile, @prompter)
+            Item::CannedHaggis
           else
             raise ArgumentError, "Don't know how to sell #{itm_type}"
           end
 
+    itm = itm_klass.new(@logfile, @prompter)
+
     itm.rstrctns.each do |r|
-      itm.try_purchase(r.ck)
+      itm.try_purchase(r.condition_success?)
     end
     itm.log_sale
   end
 end
 
 module Restriction
-  DRINKING_AGE = 21
-  SMOKING_AGE = 18
 
   class DrinkingAge
+    DRINKING_AGE = 21
     def initialize(p)
       @prompter = p
     end
 
-    def ck
+    def condition_success?
       age = @prompter.get_age
       if age >= DRINKING_AGE
         true
@@ -50,11 +51,13 @@ module Restriction
   end
 
   class SmokingAge
+    SMOKING_AGE = 18
+
     def initialize(p)
       @prompter = p
     end
 
-    def ck
+    def condition_success?
       age = @prompter.get_age
       if age >= SMOKING_AGE
         true
@@ -69,11 +72,19 @@ module Restriction
       @prompter = p
     end
 
-    def ck
+    def condition_success?
       # pp Time.now.wday
       # debugger
       Time.now.wday != 0      # 0 is Sunday
     end
+  end
+end
+
+class Prompter
+  attr_accessor :age
+
+  def initialize
+    @age = age
   end
 end
 
@@ -104,6 +115,20 @@ class Item
     else
       raise Nanomart::NoSale
     end
+  end
+
+  Item.select(name: name).first.restrictions
+  Restriction.select(name: name)
+
+  class NanoM
+
+  class Item < ActiveRecord
+    has_and_belongs_to_many :restrictions
+    belongs_to :nanomart
+  end
+
+  class Restriction < ActiveRecord
+    has_and_belongs_to_many :items
   end
 
   class Beer < Item
